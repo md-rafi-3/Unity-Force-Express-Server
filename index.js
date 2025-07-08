@@ -29,13 +29,41 @@ async function run() {
 
    app.get("/needPosts",async(req,res)=>{
     const email=req.query.email;
-    const query={};
+    const query={status:"active"};
     if(email){
       query.contactEmail=email;
     }
 
-    const cursor= volunteerPostCollections.find(query);
+    const cursor= volunteerPostCollections.find(query)
     const result=await cursor.toArray()
+    res.send(result)
+   })
+
+   app.get("/needAllPosts",async(req,res)=>{
+    const {category,search}=req.query;
+
+    console.log(search,category)
+     const query={status:"active"};
+    if(category){
+      query.category=category;
+    }
+
+    if(search){
+       query.title = { $regex: search, $options: "i" };
+    }
+
+
+
+
+    const cursor= volunteerPostCollections.find(query)
+    const result=await cursor.toArray()
+    res.send(result)
+   })
+
+
+   app.post("/needPost",async(req,res)=>{
+    const newPost=req.body;
+    const result=await volunteerPostCollections.insertOne(newPost)
     res.send(result)
    })
 
