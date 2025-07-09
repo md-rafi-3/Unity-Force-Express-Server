@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 const port =process.env.PORT|| 3000;
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config()
 
 // Middleware
@@ -29,6 +29,7 @@ async function run() {
 
    app.get("/needPosts",async(req,res)=>{
     const email=req.query.email;
+    console.log(email)
     const query={status:"active"};
     if(email){
       query.contactEmail=email;
@@ -61,9 +62,26 @@ async function run() {
    })
 
 
+
+   app.get("/needAllPosts/:id",async(req,res)=>{
+    const id=req.params.id;
+    const query={_id: new ObjectId(id)}
+    const result=await volunteerPostCollections.findOne(query)
+    res.send(result)
+   })
+
+
    app.post("/needPost",async(req,res)=>{
     const newPost=req.body;
     const result=await volunteerPostCollections.insertOne(newPost)
+    res.send(result)
+   })
+
+   app.delete("/needPosts/:id",async(req,res)=>{
+    const id=req.params.id;
+    console.log(id)
+    const query={_id: new ObjectId(id)}
+    const result=await volunteerPostCollections.deleteOne(query);
     res.send(result)
    })
 
