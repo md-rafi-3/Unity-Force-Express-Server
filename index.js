@@ -25,6 +25,7 @@ async function run() {
     await client.connect();
 
     const volunteerPostCollections=client.db('Unity-force').collection('VolunteerNeedPost');
+    const applicationsCollections=client.db('Unity-force').collection('VolunteerApplications');
 
 
    app.get("/needPosts",async(req,res)=>{
@@ -84,6 +85,42 @@ async function run() {
     const result=await volunteerPostCollections.deleteOne(query);
     res.send(result)
    })
+
+
+
+  //  application related api
+   app.post("/applications",async(req,res)=>{
+     const {data, requestedPostId}=req.body;
+     console.log(data,requestedPostId)
+      const userEmail = data.volunteerEmail;
+    try{
+      // step 1
+       const alreadyExists = await applicationsCollections.findOne({
+      volunteerEmail: userEmail,
+      postId: requestedPostId, // store this field when inserting
+    });
+
+    if (alreadyExists) {
+      return res.status(409).send({
+        success: false,
+        message: "You have already requested for this post.",
+      });
+    }
+      // step 2
+       const result=await applicationsCollections.insertOne(data);
+
+      //  step 3
+     
+     const updatePost=await volunteerPostCollections.updateOne({_id: new ObjectId(requestedPostId)},{$inc: {volunteersNeeded:-1}});
+
+     res.send({result,updatePost})
+
+    }catch(error){
+      console.error("error found",error)
+    }
+    
+   })
+
 
 
 
