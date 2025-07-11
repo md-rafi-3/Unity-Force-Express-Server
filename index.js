@@ -28,7 +28,7 @@ async function run() {
     const applicationsCollections=client.db('Unity-force').collection('VolunteerApplications');
 
 
-   app.get("/needPosts",async(req,res)=>{
+   app.get("/myPosts",async(req,res)=>{
     const email=req.query.email;
     console.log(email)
     const query={status:"active"};
@@ -41,7 +41,7 @@ async function run() {
     res.send(result)
    })
 
-   app.get("/needAllPosts",async(req,res)=>{
+   app.get("/allPosts",async(req,res)=>{
     const {category,search}=req.query;
 
     console.log(search,category)
@@ -64,7 +64,7 @@ async function run() {
 
 
 
-   app.get("/needAllPosts/:id",async(req,res)=>{
+   app.get("/allPosts/:id",async(req,res)=>{
     const id=req.params.id;
     const query={_id: new ObjectId(id)}
     const result=await volunteerPostCollections.findOne(query)
@@ -72,13 +72,13 @@ async function run() {
    })
 
 
-   app.post("/needPost",async(req,res)=>{
+   app.post("/allPosts",async(req,res)=>{
     const newPost=req.body;
     const result=await volunteerPostCollections.insertOne(newPost)
     res.send(result)
    })
 
-   app.delete("/needPosts/:id",async(req,res)=>{
+   app.delete("/myPosts/:id",async(req,res)=>{
     const id=req.params.id;
     console.log(id)
     const query={_id: new ObjectId(id)}
@@ -119,6 +119,14 @@ async function run() {
       console.error("error found",error)
     }
     
+   })
+
+
+   app.get("/applications",async(req,res)=>{
+    const email=req.query.email;
+    const query={volunteerEmail : email}
+    const result=await applicationsCollections.find(query).toArray()
+    res.send(result)
    })
 
 
