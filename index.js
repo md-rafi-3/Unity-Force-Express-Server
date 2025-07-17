@@ -78,6 +78,28 @@ async function run() {
     res.send(result)
    })
 
+
+   app.put("/allPosts/update/:id",async(req,res)=>{
+        const id=req.params.id;
+        const data=req.body.data;
+        console.log(id,data)
+
+        console.log(data)
+        const filter ={_id:new ObjectId(id)}
+         const options = { upsert: true };
+         const updatedDoc={
+          $set:{
+            data
+          }
+         }
+
+         const result=await volunteerPostCollections.updateOne(filter,updatedDoc,options)
+         res.send(result)
+
+   }
+
+  )
+
    app.delete("/myPosts/:id",async(req,res)=>{
     const id=req.params.id;
     console.log(id)
