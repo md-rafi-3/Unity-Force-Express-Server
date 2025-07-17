@@ -156,9 +156,19 @@ async function run() {
 
    app.delete("/applications/:id",async(req,res)=>{
     const id=req.params.id;
-    const query={_id: new ObjectId(id)}
+    const postId=req.body.postId;
+    console.log(postId)
+    try{
+      const query={_id: new ObjectId(id)}
     const result =await applicationsCollections.deleteOne(query);
-    res.send(result)
+      
+     const updatePost=await volunteerPostCollections.updateOne({_id: new ObjectId(postId)},{$inc: {volunteersNeeded:+1}});
+
+      res.send({result,updatePost})
+
+    }catch(error){
+      console.error("error found",error)
+    }
    })
 
    app.get("/applications/post/:id",async(req,res)=>{
