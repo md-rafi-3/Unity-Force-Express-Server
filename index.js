@@ -31,7 +31,7 @@ async function run() {
    app.get("/myPosts",async(req,res)=>{
     const email=req.query.email;
     console.log(email)
-    const query={status:"active"};
+    const query={};
     if(email){
       query.contactEmail=email;
     }
@@ -91,13 +91,15 @@ async function run() {
   //  application related api
    app.post("/applications",async(req,res)=>{
      const {data, requestedPostId}=req.body;
-     console.log(data,requestedPostId)
+     
       const userEmail = data.volunteerEmail;
+      
+      console.log(data,requestedPostId,userEmail)
     try{
       // step 1
        const alreadyExists = await applicationsCollections.findOne({
       volunteerEmail: userEmail,
-      postId: requestedPostId, // store this field when inserting
+      postId: requestedPostId,
     });
 
     if (alreadyExists) {
@@ -126,6 +128,40 @@ async function run() {
     const email=req.query.email;
     const query={volunteerEmail : email}
     const result=await applicationsCollections.find(query).toArray()
+    res.send(result)
+   })
+
+
+   app.delete("/applications/:id",async(req,res)=>{
+    const id=req.params.id;
+    const query={_id: new ObjectId(id)}
+    const result =await applicationsCollections.deleteOne(query);
+    res.send(result)
+   })
+
+   app.get("/applications/post/:id",async(req,res)=>{
+    const id=req.params.id;
+    console.log(id)
+    
+    const query={ postId : id}
+    const result=await applicationsCollections.find(query).toArray();
+    res.send(result)
+   })
+
+
+   app.patch("/applications/status/:id",async(req,res)=>{
+    const id=req.params.id;
+    const status=req.body.status;
+    console.log(id,status)
+    const filter ={_id: new ObjectId(id)}
+    const updatedDoc={
+      $set:{
+        status:req.body.status
+      }
+    }
+    console.log(updatedDoc)
+
+    const result=await applicationsCollections.updateOne(filter,updatedDoc);
     res.send(result)
    })
 
