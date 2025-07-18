@@ -1,6 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 const app = express();
+const admin = require("firebase-admin");
+const serviceAccount = require("./SDK-KEY.json");
 const port =process.env.PORT|| 3000;
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config()
@@ -19,6 +21,58 @@ const client = new MongoClient(uri, {
     deprecationErrors: true,
   }
 });
+
+
+// firebase JWT
+
+
+
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount)
+});
+
+
+
+const verifyFirebaseToken=async(req,res,next)=>{
+  
+   const authHeader=req.headers?.authorization;
+   
+   if(!authHeader || !authHeader.startsWith('Bearer ')){
+    return res.status(401).send({message: "Unauthorized Access"})
+   }
+
+   
+   
+   
+   const token=authHeader.split(" ")[1];
+
+   
+   if(!token){
+    return res.status(401).send({message: "Unauthorized Access"})
+   }
+     
+   
+
+   
+
+
+   try{
+    const decoded=await admin.auth().verifyIdToken(token)
+    req.decoded=decoded;
+    console.log("decoded token",decoded)
+    next();
+   }catch(error){
+      return res.status(401).send({message: "Unauthorized Access"})
+   }
+    console.log("token in the middle ware",token)
+   
+}
+
+// firebase jwt end
+
+
+
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
@@ -28,8 +82,11 @@ async function run() {
     const applicationsCollections=client.db('Unity-force').collection('VolunteerApplications');
 
 
-   app.get("/myPosts",async(req,res)=>{
+   app.get("/myPosts",verifyFirebaseToken,async(req,res)=>{
     const email=req.query.email;
+    if(email !== req.decoded.email){
+      return res.status(403).message({message:"Forbidden access"})
+    }
     console.log(email)
     const query={};
     if(email){
@@ -146,9 +203,16 @@ async function run() {
    })
 
 
-   app.get("/applications",async(req,res)=>{
+   app.get("/applications",verifyFirebaseToken,async(req,res)=>{
     const email=req.query.email;
+     
+    console.log("decoded email",req.decoded.email)
+    if(email !== req.decoded.email){
+      return res.status(403).message({message:"Forbidden access"})
+    }
     const query={volunteerEmail : email}
+
+    console.log("req header",req.headers)
     const result=await applicationsCollections.find(query).toArray()
     res.send(result)
    })
