@@ -3,7 +3,6 @@ const cors = require('cors');
 const app = express();
 const admin = require("firebase-admin");
 const serviceAccount = require("./SDK-KEY.json");
-const cron = require('node-cron');
 const port =process.env.PORT|| 3000;
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config()
@@ -84,22 +83,6 @@ async function run() {
 
 
 
-    // Auto close expired posts every 1 hour
-cron.schedule('0 * * * *', async () => {
-  const now = new Date();
-  try {
-    const result = await client.db('Unity-force')
-      .collection('VolunteerNeedPost')
-      .updateMany(
-        { deadline: { $lt: now }, status: { $ne: 'closed' } },
-        { $set: { status: 'closed' } }
-      );
-
-    console.log(`${result.modifiedCount} posts auto-closed due to deadline.`);
-  } catch (error) {
-    console.error('Cron job error:', error);
-  }
-});
 
 
 
