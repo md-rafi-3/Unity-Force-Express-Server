@@ -3,6 +3,7 @@ const cors = require('cors');
 const app = express();
 const admin = require("firebase-admin");
 const serviceAccount = require("./SDK-KEY.json");
+const cron = require('node-cron');
 const port =process.env.PORT|| 3000;
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config()
@@ -82,6 +83,26 @@ async function run() {
     const applicationsCollections=client.db('Unity-force').collection('VolunteerApplications');
 
 
+
+    // Auto close expired posts every 1 hour
+cron.schedule('0 * * * *', async () => {
+  const now = new Date();
+  try {
+    const result = await client.db('Unity-force')
+      .collection('VolunteerNeedPost')
+      .updateMany(
+        { deadline: { $lt: now }, status: { $ne: 'closed' } },
+        { $set: { status: 'closed' } }
+      );
+
+    console.log(`${result.modifiedCount} posts auto-closed due to deadline.`);
+  } catch (error) {
+    console.error('Cron job error:', error);
+  }
+});
+
+
+
    app.get("/myPosts",verifyFirebaseToken,async(req,res)=>{
     const email=req.query.email;
     if(email !== req.decoded.email){
@@ -114,7 +135,7 @@ async function run() {
 
 
 
-    const cursor= volunteerPostCollections.find(query)
+    const cursor= volunteerPostCollections.find(query).sort({ deadline: 1 })
     const result=await cursor.toArray()
     res.send(result)
    })
@@ -131,6 +152,11 @@ async function run() {
 
    app.post("/allPosts",async(req,res)=>{
     const newPost=req.body;
+
+   if (newPost.deadline && typeof newPost.deadline === "string") {
+    newPost.deadline = new Date(newPost.deadline);
+  }
+
     const result=await volunteerPostCollections.insertOne(newPost)
     res.send(result)
    })
@@ -140,6 +166,9 @@ async function run() {
         const id=req.params.id;
         const data=req.body.data;
         console.log(id,data)
+          if (data.deadline && typeof data.deadline === "string") {
+    data.deadline = new Date(data.deadline);
+  }
 
         console.log(data)
         const filter ={_id:new ObjectId(id)}
