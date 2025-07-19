@@ -76,7 +76,7 @@ const verifyFirebaseToken=async(req,res,next)=>{
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
 
     const volunteerPostCollections=client.db('Unity-force').collection('VolunteerNeedPost');
     const applicationsCollections=client.db('Unity-force').collection('VolunteerApplications');
@@ -149,9 +149,7 @@ async function run() {
         const id=req.params.id;
         const data=req.body.data;
         console.log(id,data)
-          if (data.deadline && typeof data.deadline === "string") {
-    data.deadline = new Date(data.deadline);
-  }
+        
 
         console.log(data)
         const filter ={_id:new ObjectId(id)}

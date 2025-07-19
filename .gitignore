@@ -1,3 +1,4 @@
 node_modules
 .env
 SDK-KEY.json
+.vercel
