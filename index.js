@@ -60,12 +60,12 @@ const verifyFirebaseToken=async(req,res,next)=>{
    try{
     const decoded=await admin.auth().verifyIdToken(token)
     req.decoded=decoded;
-    console.log("decoded token",decoded)
+    // console.log("decoded token",decoded)
     next();
    }catch(error){
       return res.status(401).send({message: "Unauthorized Access"})
    }
-    console.log("token in the middle ware",token)
+    // console.log("token in the middle ware",token)
    
 }
 
@@ -91,7 +91,7 @@ async function run() {
     if(email !== req.decoded.email){
       return res.status(403).message({message:"Forbidden access"})
     }
-    console.log(email)
+    // console.log(email)
     const query={};
     if(email){
       query.contactEmail=email;
@@ -105,7 +105,7 @@ async function run() {
    app.get("/allPosts",async(req,res)=>{
     const {category,search}=req.query;
 
-    console.log(search,category)
+    // console.log(search,category)
      const query={status:"active"};
     if(category){
       query.category=category;
@@ -148,10 +148,10 @@ async function run() {
    app.put("/allPosts/update/:id",async(req,res)=>{
         const id=req.params.id;
         const data=req.body.data;
-        console.log(id,data)
+        // console.log(id,data)
         
 
-        console.log(data)
+        // console.log(data)
         const filter ={_id:new ObjectId(id)}
          const options = { upsert: true };
          const updatedDoc={
@@ -169,7 +169,7 @@ async function run() {
 
    app.delete("/myPosts/:id",async(req,res)=>{
     const id=req.params.id;
-    console.log(id)
+    // console.log(id)
     const query={_id: new ObjectId(id)}
     const result=await volunteerPostCollections.deleteOne(query);
     res.send(result)
@@ -183,7 +183,7 @@ async function run() {
      
       const userEmail = data.volunteerEmail;
       
-      console.log(data,requestedPostId,userEmail)
+      // console.log(data,requestedPostId,userEmail)
     try{
       // step 1
        const alreadyExists = await applicationsCollections.findOne({
@@ -216,13 +216,13 @@ async function run() {
    app.get("/applications",verifyFirebaseToken,async(req,res)=>{
     const email=req.query.email;
      
-    console.log("decoded email",req.decoded.email)
+    // console.log("decoded email",req.decoded.email)
     if(email !== req.decoded.email){
       return res.status(403).message({message:"Forbidden access"})
     }
     const query={volunteerEmail : email}
 
-    console.log("req header",req.headers)
+    // console.log("req header",req.headers)
     const result=await applicationsCollections.find(query).toArray()
     res.send(result)
    })
@@ -231,7 +231,7 @@ async function run() {
    app.delete("/applications/:id",async(req,res)=>{
     const id=req.params.id;
     const postId=req.body.postId;
-    console.log(postId)
+    // console.log(postId)
     try{
       const query={_id: new ObjectId(id)}
     const result =await applicationsCollections.deleteOne(query);
@@ -247,7 +247,7 @@ async function run() {
 
    app.get("/applications/post/:id",async(req,res)=>{
     const id=req.params.id;
-    console.log(id)
+    // console.log(id)
     
     const query={ postId : id}
     const result=await applicationsCollections.find(query).toArray();
@@ -258,14 +258,14 @@ async function run() {
    app.patch("/applications/status/:id",async(req,res)=>{
     const id=req.params.id;
     const status=req.body.status;
-    console.log(id,status)
+    // console.log(id,status)
     const filter ={_id: new ObjectId(id)}
     const updatedDoc={
       $set:{
         status:req.body.status
       }
     }
-    console.log(updatedDoc)
+    // console.log(updatedDoc)
 
     const result=await applicationsCollections.updateOne(filter,updatedDoc);
     res.send(result)
