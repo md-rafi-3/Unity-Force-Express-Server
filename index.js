@@ -155,9 +155,8 @@ async function run() {
         const filter ={_id:new ObjectId(id)}
          const options = { upsert: true };
          const updatedDoc={
-          $set:{
-            data
-          }
+          $set: data
+          
          }
 
          const result=await volunteerPostCollections.updateOne(filter,updatedDoc,options)
