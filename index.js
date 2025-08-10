@@ -80,6 +80,7 @@ async function run() {
 
     const volunteerPostCollections=client.db('Unity-force').collection('VolunteerNeedPost');
     const applicationsCollections=client.db('Unity-force').collection('VolunteerApplications');
+    const blogsCollections=client.db('Unity-force').collection('Blogs');
 
 
 
@@ -270,6 +271,13 @@ async function run() {
     res.send(result)
    })
 
+
+  //  blog related api
+  app.post("/add-blog",async(req,res)=>{
+    const newBlog=req.body;
+    const result=await blogsCollections.insertOne(newBlog);
+    res.send(result)
+  })
 
 
 
